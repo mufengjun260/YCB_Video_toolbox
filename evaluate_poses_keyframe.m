@@ -14,7 +14,7 @@ models = cell(num_objects, 1);
 for i = 1:num_objects
     filename = fullfile(opt.root, 'models', object_names{i}, 'points.xyz');
     disp(filename);
-    models{i} = load(filename);
+    models{i} = load(filename); 
 end
 
 % load the keyframe indexes
