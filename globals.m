@@ -1,6 +1,6 @@
 function opt = globals()
 
-opt.root = '/home/mufengjun260/GitHub/DenseFusion1.0/DenseFusion/datasets/ycb/YCB_Video_Dataset';
+opt.root = 'D:\datasets\YCB_zip';
 opt.num_classes = 21;
 
 opt.seq_num = 92;

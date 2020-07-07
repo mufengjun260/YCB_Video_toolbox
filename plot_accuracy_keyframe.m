@@ -1,8 +1,8 @@
 function plot_accuracy_keyframe
 
 color = {'r', 'y', 'g', 'b', 'm'};
-leng = {'PoseCNN', 'PoseCNN+ICP', 'PoseCNN+Multiview', 'PoseCNN+ICP+Multiview', ...
-    '3D Coordinate Regression'};
+leng = {'iterative', 'PoseCNN+ICP', 'per-pixel', '3DCoordinate', ...
+    '3D'};
 aps = zeros(5, 1);
 lengs = cell(5, 1);
 close all;
@@ -15,7 +15,7 @@ rotations = object.errors_rotation;
 translations = object.errors_translation;
 cls_ids = object.results_cls_id;
 
-index_plot = [4, 2, 5, 3, 1];
+index_plot = [2, 3, 1, 5];
 
 % read class names
 fid = fopen('classes.txt', 'r');
@@ -25,7 +25,7 @@ classes{end+1} = 'All 21 objects';
 fclose(fid);
 
 hf = figure('units','normalized','outerposition',[0 0 1 1]);
-font_size = 24;
+font_size = 12;
 max_distance = 0.1;
 
 % for each class
@@ -42,10 +42,16 @@ for k = 1:numel(classes)
         D(D > max_distance) = inf;
         d = sort(D);
         n = numel(d);
-        accuracy = cumsum(ones(1, n)) / n;        
+        c = numel(d(d < 0.02));
+        accuracy = cumsum(ones(1, n)) / n;
+%         fprintf('k = %d i = %d : length %d\n',k,i,length(d));
+%         dd = find(d == d(end));
+%         ddd = find(d ~= d(end));
+%         fprintf('k = %d i = %d : length %d %d %d %d\n',k,i,length(d), length(dd), d(end), ddd(end));
+
         plot(d, accuracy, color{i}, 'LineWidth', 4);
         aps(i) = VOCap(d, accuracy);
-        lengs{i} = sprintf('%s (%.2f)', leng{i}, aps(i) * 100);
+        lengs{i} = sprintf('%s(AUC:%.2f)(<2cm:%.2f)', leng{i}, aps(i)*100, (c/n)*100);
         hold on;
     end
     hold off;
@@ -69,10 +75,11 @@ for k = 1:numel(classes)
         D(D > max_distance) = inf;
         d = sort(D);
         n = numel(d);
+        c = numel(d(d < 0.02));
         accuracy = cumsum(ones(1, n)) / n;
         plot(d, accuracy, color{i}, 'LineWidth', 4);
         aps(i) = VOCap(d, accuracy);
-        lengs{i} = sprintf('%s (%.2f)', leng{i}, aps(i) * 100);        
+        lengs{i} = sprintf('%s(AUC:%.2f)(<2cm:%.2f)', leng{i}, aps(i)*100, (c/n)*100);        
         hold on;
     end
     hold off;
@@ -147,6 +154,14 @@ rec = rec(index);
 prec = prec(index)';
 
 mrec=[0 ; rec ; 0.1];
+% disp(prec)
+% disp(end)
+% disp(length(prec))
+% if length(prec) == 0
+%     prec(1) = 1;
+% end
+% disp(prec(end))
+
 mpre=[0 ; prec ; prec(end)];
 for i = 2:numel(mpre)
     mpre(i) = max(mpre(i), mpre(i-1));

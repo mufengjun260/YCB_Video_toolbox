@@ -14,7 +14,7 @@ models = cell(num_objects, 1);
 for i = 1:num_objects
     filename = fullfile(opt.root, 'models', object_names{i}, 'points.xyz');
     disp(filename);
-    models{i} = load(filename); 
+    models{i} = load(filename);
 end
 
 % load the keyframe indexes
@@ -44,8 +44,12 @@ for i = 1:numel(keyframes)
     frame_id = str2double(name(pos+1:end));
             
     % load PoseCNN result
-    filename = sprintf('results_PoseCNN/%04d.mat', i - 1);
+    filename = sprintf('results_PoseCNN_RSS2018/%06d.mat', i - 1);
     result = load(filename);
+    filename = sprintf('Densefusion_iterative_result/%04d.mat', i - 1);
+    result_my = load(filename);
+    filename = sprintf('Densefusion_wo_refine_result/%04d.mat', i - 1);
+    result_mygt = load(filename);
 
     % load 3D coordinate regression result
     filename = sprintf('results_3DCoordinate/%04d.mat', i - 1);
@@ -73,8 +77,8 @@ for i = 1:numel(keyframes)
             RT = zeros(3, 4);
 
             % pose from network
-            RT(1:3, 1:3) = quat2rotm(result.poses(roi_index, 1:4));
-            RT(:, 4) = result.poses(roi_index, 5:7);
+            RT(1:3, 1:3) = quat2rotm(result_my.poses(roi_index, 1:4));
+            RT(:, 4) = result_my.poses(roi_index, 5:7);
             distances_sys(count, 1) = adi(RT, RT_gt, models{cls_index}');
             distances_non(count, 1) = add(RT, RT_gt, models{cls_index}');
             errors_rotation(count, 1) = re(RT(1:3, 1:3), RT_gt(1:3, 1:3));
@@ -89,20 +93,21 @@ for i = 1:numel(keyframes)
             errors_translation(count, 2) = te(RT(:, 4), RT_gt(:, 4));
 
             % pose from multiview
-            RT(1:3, 1:3) = quat2rotm(result.poses_multiview(roi_index, 1:4));
-            RT(:, 4) = result.poses_multiview(roi_index, 5:7);
+            RT(1:3, 1:3) = quat2rotm(result_mygt.poses(roi_index, 1:4));
+            RT(:, 4) = result_mygt.poses(roi_index, 5:7);
             distances_sys(count, 3) = adi(RT, RT_gt, models{cls_index}');
             distances_non(count, 3) = add(RT, RT_gt, models{cls_index}');
             errors_rotation(count, 3) = re(RT(1:3, 1:3), RT_gt(1:3, 1:3));
             errors_translation(count, 3) = te(RT(:, 4), RT_gt(:, 4));
-
-            % pose from multiview + ICP
-            RT(1:3, 1:3) = quat2rotm(result.poses_multiview_icp(roi_index, 1:4));
-            RT(:, 4) = result.poses_multiview_icp(roi_index, 5:7);
-            distances_sys(count, 4) = adi(RT, RT_gt, models{cls_index}');
-            distances_non(count, 4) = add(RT, RT_gt, models{cls_index}');
-            errors_rotation(count, 4) = re(RT(1:3, 1:3), RT_gt(1:3, 1:3));
-            errors_translation(count, 4) = te(RT(:, 4), RT_gt(:, 4));                    
+% 
+            
+%             % pose from multiview + ICP
+%             RT(1:3, 1:3) = quat2rotm(result.poses_multiview_icp(roi_index, 1:4));
+%             RT(:, 4) = result.poses_multiview_icp(roi_index, 5:7);
+%             distances_sys(count, 4) = adi(RT, RT_gt, models{cls_index}');
+%             distances_non(count, 4) = add(RT, RT_gt, models{cls_index}');
+%             errors_rotation(count, 4) = re(RT(1:3, 1:3), RT_gt(1:3, 1:3));
+%             errors_translation(count, 4) = te(RT(:, 4), RT_gt(:, 4));                    
         else
             distances_sys(count, 1:4) = inf;
             distances_non(count, 1:4) = inf;
