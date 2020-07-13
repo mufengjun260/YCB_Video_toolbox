@@ -46,9 +46,9 @@ for i = 1:numel(keyframes)
     % load PoseCNN result
     filename = sprintf('results_PoseCNN_RSS2018/%06d.mat', i - 1);
     result = load(filename);
-    filename = sprintf('Densefusion_iterative_result/%04d.mat', i - 1);
+    filename = sprintf('ori/Densefusion_iterative_result/%04d.mat', i - 1);
     result_my = load(filename);
-    filename = sprintf('Densefusion_wo_refine_result/%04d.mat', i - 1);
+    filename = sprintf('ori/Densefusion_wo_refine_result/%04d.mat', i - 1);
     result_mygt = load(filename);
 
     % load 3D coordinate regression result
